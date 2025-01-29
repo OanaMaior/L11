@@ -1,0 +1,43 @@
+import pandas as pd
+
+# Crearea DataFrame-ului manual
+data = {
+    "Produs": ["Tableta", "Mouse", "Televizor", "Monitor", "Camera Foto", "Monitor", "Mouse", "Televizor", "Imprimanta", "Casti",
+               "Laptop", "Mouse", "Televizor", "Imprimanta", "Telefon", "Televizor", "Tableta", "Telefon", "Telefon", "Monitor",
+               "Tableta", "Monitor", "Laptop", "Tastatura", "Tastatura", "Mouse", "Televizor", "Monitor", "Casti", "Imprimanta"],
+    "Cantitate": [10, 16, 11, 2, 4, 18, 16, 20, 5, 19, 6, 19, 13, 18, 16, 7, 17, 8, 1, 6, 17, 6, 9, 7, 19, 5, 13, 14, 5, 11],
+    "Pret": [3988.13, 4577.51, 3522.2, 347.18, 4760.66, 1317.03, 3378.7, 470.9, 3131.4, 4800.31,
+             2419.11, 3905.57, 4493.27, 2555.73, 4563.49, 3578.61, 4750.33, 4244.18, 3125.21, 4673.98,
+             1614.2, 3893.83, 4126.75, 3044.24, 2561.85, 237.16, 1799.53, 2539.1, 2657.54, 3377.68],
+    "Data": pd.to_datetime(["1/27/2023", "12/31/2023", "5/16/2023", "7/19/2023", "4/6/2023", "1/30/2023", "3/3/2023", "7/3/2023",
+                            "1/3/2023", "3/10/2023", "3/12/2023", "9/19/2023", "11/2/2023", "4/10/2023", "3/22/2023", "3/17/2023",
+                            "5/13/2023", "6/3/2023", "11/23/2023", "4/14/2023", "4/11/2023", "4/6/2023", "10/2/2023", "5/16/2023",
+                            "2/13/2023", "9/21/2023", "3/17/2023", "8/7/2023", "7/12/2023", "7/26/2023"])
+}
+
+df = pd.DataFrame(data)
+
+# 1. Cele mai vândute produse pe lună
+df['Luna'] = df['Data'].dt.to_period('M')
+top_produs_pe_luna = df.groupby(['Luna', 'Produs'])['Cantitate'].sum().reset_index()
+top_produs_pe_luna = top_produs_pe_luna.sort_values(by=['Luna', 'Cantitate'], ascending=[True, False])
+print("Cele mai vândute produse pe lună:")
+print(top_produs_pe_luna)
+
+# 2. Venitul total pe fiecare produs
+df['Venit'] = df['Cantitate'] * df['Pret']
+venit_total = df.groupby('Produs')['Venit'].sum().reset_index().sort_values(by="Venit", ascending=False)
+print("\nVenitul total pe fiecare produs:")
+print(venit_total)
+
+# 3. Filtrare interval de timp (ex: 01.01.2023 - 31.03.2023)
+start_date = "2023-01-01"
+end_date = "2023-03-31"
+df_filtrat = df[(df["Data"] >= start_date) & (df["Data"] <= end_date)]
+print("\nVânzările între 01.01.2023 și 31.03.2023:")
+print(df_filtrat)
+
+# 4. Venitul mediu lunar
+venit_mediu_lunar = df.groupby(df['Data'].dt.to_period('M'))['Venit'].mean().reset_index()
+print("\nVenitul mediu lunar:")
+print(venit_mediu_lunar)
