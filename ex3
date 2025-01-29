@@ -1,0 +1,76 @@
+import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+import seaborn as sns
+
+# Lista de produse din captura de ecran
+produse = [
+    "Tableta", "Mouse", "Televizor", "Monitor", "Camera Foto", "Imprimanta",
+    "Casti", "Laptop", "Telefon", "Tastatura"
+]
+
+# Generarea datasetului pentru 60 de zile
+zile = pd.date_range(start="2023-01-01", periods=60, freq='D')
+vanzari = []
+np.random.seed(42)
+
+for zi in zile:
+    numar_produse = np.random.randint(5, 16)  # Între 5 și 15 produse/zi
+    produse_vandute = np.random.choice(produse, numar_produse, replace=True)
+
+    for produs in produse_vandute:
+        pret = np.random.normal(40, 8)  # Distribuție normală
+        cantitate = np.random.randint(1, 11)  # Între 1 și 10 bucăți
+
+        # Aplicăm promoția cu 30% probabilitate
+        promotie = np.random.rand() < 0.3
+        if promotie:
+            pret_reducere = pret * 0.8  # Reducere 20%
+        else:
+            pret_reducere = pret
+
+        venit = pret_reducere * cantitate
+        profit = venit * 0.30  # Marja de profit 30%
+
+        vanzari.append([zi, produs, round(pret, 2), round(pret_reducere, 2), cantitate, venit, profit, promotie])
+
+# Crearea DataFrame-ului
+df = pd.DataFrame(vanzari,
+                  columns=["Data", "Produs", "Pret Initial", "Pret Final", "Cantitate", "Venit", "Profit", "Promotie"])
+
+# ✅ 1. Evoluția veniturilor și profitului pe zile
+evolutie = df.groupby("Data")[["Venit", "Profit"]].sum().reset_index()
+
+plt.figure(figsize=(12, 5))
+plt.plot(evolutie["Data"], evolutie["Venit"], label="Venit Total", marker="o", linestyle="-")
+plt.plot(evolutie["Data"], evolutie["Profit"], label="Profit Total", marker="s", linestyle="--")
+plt.xlabel("Data")
+plt.ylabel("Suma (RON)")
+plt.title("Evoluția veniturilor și profitului pe 60 de zile")
+plt.legend()
+plt.xticks(rotation=45)
+plt.grid()
+plt.show()
+
+# ✅ 2. Distribuția preturilor și cantităților vândute
+fig, axes = plt.subplots(1, 2, figsize=(12, 5))
+
+sns.histplot(df["Pret Final"], bins=20, kde=True, ax=axes[0], color="blue")
+axes[0].set_title("Distribuția prețurilor produselor")
+axes[0].set_xlabel("Preț")
+
+sns.histplot(df["Cantitate"], bins=10, kde=True, ax=axes[1], color="green")
+axes[1].set_title("Distribuția cantităților vândute")
+axes[1].set_xlabel("Cantitate")
+
+plt.tight_layout()
+plt.show()
+
+# ✅ 3. Vizualizarea promoțiilor și impactul asupra prețurilor
+plt.figure(figsize=(10, 5))
+sns.boxplot(x=df["Promotie"], y=df["Pret Final"], palette=["red", "green"])
+plt.xticks([0, 1], ["Fără Promoție", "Cu Promoție"])
+plt.title("Impactul promoțiilor asupra prețului produselor")
+plt.xlabel("Promoție")
+plt.ylabel("Preț Final")
+plt.show()
