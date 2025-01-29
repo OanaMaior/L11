@@ -1,0 +1,50 @@
+import numpy as np
+import pandas as pd
+
+# Lista de produse din captura de ecran
+produse = [
+    "Tableta", "Mouse", "Televizor", "Monitor", "Camera Foto", "Imprimanta",
+    "Casti", "Laptop", "Telefon", "Tastatura"
+]
+
+# Generăm date pentru 60 de zile
+zile = pd.date_range(start="2023-01-01", periods=60, freq='D')
+
+# Lista pentru a stoca datele simulate
+vanzari = []
+
+np.random.seed(42)  # Pentru rezultate reproductibile
+
+for zi in zile:
+    numar_produse = np.random.randint(5, 16)  # Între 5 și 15 produse/zi
+    produse_vandute = np.random.choice(produse, numar_produse, replace=True)
+
+    for produs in produse_vandute:
+        pret = np.random.normal(40, 8)  # Distribuție normală
+        cantitate = np.random.randint(1, 11)  # Între 1 și 10 bucăți
+
+        # Aplicăm promoția cu 30% probabilitate (scădere de 20% la preț)
+        if np.random.rand() < 0.3:
+            pret *= 0.8  # Reducere de 20%
+
+        venit = pret * cantitate
+        profit = venit * 0.30  # Marja de profit de 30%
+
+        vanzari.append([zi, produs, round(pret, 2), cantitate, round(venit, 2), round(profit, 2)])
+
+# Crearea DataFrame-ului
+df = pd.DataFrame(vanzari, columns=["Data", "Produs", "Pret", "Cantitate", "Venit", "Profit"])
+
+# 1. Media, maximul și minimul pentru preț, cantitate și profit
+statistici = df[['Pret', 'Cantitate', 'Profit']].agg(['mean', 'max', 'min'])
+
+# 2. Total vânzări și profit pe 60 de zile
+total_vanzari = df['Venit'].sum()
+total_profit = df['Profit'].sum()
+
+# 3. Afișare rezultate
+print("\nStatistici generale:")
+print(statistici)
+
+print(f"\nTotal vânzări pe 60 de zile: {total_vanzari:.2f}")
+print(f"Total profit pe 60 de zile: {total_profit:.2f}")
